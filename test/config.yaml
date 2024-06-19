@@ -1,0 +1,30 @@
+awsOrgs:
+  - name: test
+    region: us-east-1
+    accountID: 123456789012
+    accessKeyID: AKIAIOSFODNN7EXAMPLE
+    secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    roleName: iamrotator
+    iamUserName: iamrotator
+gerritRepos:
+  - name: test
+    url: https://gerrit.googlesource.com/git-repo
+githubOrgs:
+  - name: test
+    token: 1234567890abcdef1234567890abcdef12345678
+    user: test
+githubRepos:
+  - name: test
+    token: 1234567890abcdef1234567890abcdef12345678
+    user: test
+k8sClusters:
+  - name: test
+    kubeconfig: |
+      apiVersion: v1
+      clusters:
+      - cluster:
+          server: https://localhost
+1passwordInstances:
+  - name: test
+    token: 1234567890abcdef1234567890abcdef12345678
+    user: test
