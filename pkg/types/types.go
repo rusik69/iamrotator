@@ -12,6 +12,8 @@ type AWS struct {
 	AccessKeyID string `yaml:"accessKeyID"`
 	// SecretAccessKey represents the AWS secret access key
 	SecretAccessKey string `yaml:"secretAccessKey"`
+	// SessionToken represents the AWS session token
+	SessionToken string `yaml:"sessionToken"`
 	// RoleName represents the AWS role name
 	RoleName string `yaml:"roleName"`
 	// IamUserName represents the AWS IAM user name

@@ -4,6 +4,7 @@ awsOrgs:
     accountID: 123456789012
     accessKeyID: AKIAIOSFODNN7EXAMPLE
     secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    sessionToken: AQoDYXdzEJr...EXAMPLE
     roleName: iamrotator
     iamUserName: iamrotator
 gerritRepos:

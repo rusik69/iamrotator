@@ -51,3 +51,4 @@ func CreateIamUser(sess *session.Session, userName string) error {
 	}
 	return nil
 }
+

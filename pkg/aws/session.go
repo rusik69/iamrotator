@@ -11,7 +11,7 @@ import (
 func CreateSession(cfg types.AWS) (*session.Session, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(cfg.Region),
-		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, ""),
+		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, cfg.SessionToken),
 	})
 	if err != nil {
 		return nil, err
