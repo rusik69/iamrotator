@@ -5,7 +5,7 @@ import "github.com/rusik69/iamrotator/pkg/types"
 // Config represents the configuration
 type Config struct {
 	// AWS represents the AWS configuration
-	AWS []types.AWS `yaml:"awsOrgs"`
+	AWS types.AWS `yaml:"aws"`
 	// GerritRepos represents the Gerrit repository configuration
 	GerritRepos []types.GerritRepo `yaml:"gerritRepos"`
 	// GithubOrgs represents the Github organization configuration

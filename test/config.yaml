@@ -1,12 +1,12 @@
-awsOrgs:
-  - name: test
-    region: us-east-1
-    accountID: 123456789012
-    accessKeyID: AKIAIOSFODNN7EXAMPLE
-    secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    sessionToken: AQoDYXdzEJr...EXAMPLE
-    roleName: iamrotator
-    iamUserName: iamrotator
+aws:
+  name: test
+  region: us-east-1
+  accountID: 123456789012
+  accessKeyID: AKIAIOSFODNN7EXAMPLE
+  secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  sessionToken: AQoDYXdzEJr...EXAMPLE
+  roleName: iamrotator
+  iamUserName: iamrotator
 gerritRepos:
   - name: test
     url: https://gerrit.googlesource.com/git-repo

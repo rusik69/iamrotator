@@ -1,6 +1,8 @@
 package aws
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -23,6 +25,7 @@ func ListIamUsers(sess *session.Session) ([]string, error) {
 // CreateIamUser creates a new IAM user
 func CreateIamUser(sess *session.Session, userName string) error {
 	svc := iam.New(sess)
+	fmt.Println("Creating IAM user", userName)
 	input := &iam.CreateUserInput{
 		UserName: &userName,
 	}
@@ -52,3 +55,89 @@ func CreateIamUser(sess *session.Session, userName string) error {
 	return nil
 }
 
+// CreateAccessKeys creates access keys for the IAM user
+func CreateAccessKeys(sess *session.Session, userName string) (string, string, error) {
+	svc := iam.New(sess)
+	input := &iam.CreateAccessKeyInput{
+		UserName: aws.String(userName),
+	}
+	result, err := svc.CreateAccessKey(input)
+	if err != nil {
+		return "", "", err
+	}
+	return *result.AccessKey.AccessKeyId, *result.AccessKey.SecretAccessKey, err
+}
+
+// CheckOrCreateIamUser checks if the IAM user exists and creates it if it doesn't
+func CheckOrCreateIamUser(sess *session.Session, userName string) (string, string, error) {
+	users, err := ListIamUsers(sess)
+	if err != nil {
+		return "", "", err
+	}
+	userFound := false
+	for _, user := range users {
+		if user == userName {
+			userFound = true
+			break
+		}
+	}
+	if userFound {
+		fmt.Println("IAM user", userName, "found")
+		return "", "", err
+	}
+	fmt.Println("IAM user", userName, "not found")
+	err = CreateIamUser(sess, userName)
+	if err != nil {
+		return "", "", err
+	}
+	return CreateAccessKeys(sess, userName)
+}
+
+// RemoveIamUser removes the IAM user
+func RemoveIamUser(sess *session.Session, userName string) error {
+	svc := iam.New(sess)
+	listPoliciesInput := &iam.ListUserPoliciesInput{
+		UserName: aws.String(userName),
+	}
+	policyNames, err := svc.ListUserPolicies(listPoliciesInput)
+	if err != nil {
+		return err
+	}
+	for _, policyName := range policyNames.PolicyNames {
+		fmt.Println("Detaching policy", *policyName)
+		detachPolicyInput := &iam.DeleteUserPolicyInput{
+			UserName:   aws.String(userName),
+			PolicyName: policyName,
+		}
+		_, err := svc.DeleteUserPolicy(detachPolicyInput)
+		if err != nil {
+			return err
+		}
+	}
+	listAccessKeysInput := &iam.ListAccessKeysInput{
+		UserName: aws.String(userName),
+	}
+	accessKeys, err := svc.ListAccessKeys(listAccessKeysInput)
+	if err != nil {
+		return err
+	}
+	for _, accessKey := range accessKeys.AccessKeyMetadata {
+		deleteAccessKeyInput := &iam.DeleteAccessKeyInput{
+			AccessKeyId: accessKey.AccessKeyId,
+			UserName:    aws.String(userName),
+		}
+		fmt.Println("Deleting access key", *accessKey.AccessKeyId)
+		_, err := svc.DeleteAccessKey(deleteAccessKeyInput)
+		if err != nil {
+			return err
+		}
+	}
+	input := &iam.DeleteUserInput{
+		UserName: &userName,
+	}
+	_, err = svc.DeleteUser(input)
+	if err != nil {
+		return err
+	}
+	return nil
+}

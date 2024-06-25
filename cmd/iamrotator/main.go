@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/rusik69/iamrotator/pkg/args"
 	"github.com/rusik69/iamrotator/pkg/aws"
@@ -9,56 +10,49 @@ import (
 )
 
 func main() {
-	args := args.Parse()
-	cfg, err := config.Load(args.ConfigPath)
+	arg := args.Parse()
+	cfg, err := config.Load(arg.ConfigPath)
 	if err != nil {
 		panic(err)
 	}
-	for _, awsCfg := range cfg.AWS {
-		fmt.Printf("Checking AWS account %s\n", awsCfg.AccountID)
-		awsSess, err := aws.CreateSession(awsCfg)
+	fmt.Printf("Loaded configuration from %s\n", arg.ConfigPath)
+	fmt.Printf("Config: %v\n", cfg)
+	awsSess, err := aws.CreateSession(cfg.AWS)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Checking AWS account %s\n", cfg.AWS.AccountID)
+	if arg.Action == "createuser" {
+		newKeyID, NewKeySecret, err := aws.CheckOrCreateIamUser(awsSess, cfg.AWS.IamUserName)
 		if err != nil {
 			panic(err)
 		}
-		users, err := aws.ListIamUsers(awsSess)
+		fmt.Printf("Access Key ID: %s\n", newKeyID)
+		fmt.Printf("Secret Access Key: %s\n", NewKeySecret)
+	} else if arg.Action == "createstackset" {
+		fmt.Println("Checking or creating stack set")
+		err = aws.CheckOrCreateStackSet(awsSess, cfg.AWS)
 		if err != nil {
 			panic(err)
 		}
-		userFound := false
-		for _, user := range users {
-			if user == awsCfg.IamUserName {
-				userFound = true
-				break
-			}
-		}
-		if userFound {
-			fmt.Println("IAM User found")
-		} else {
-			fmt.Println("IAM User not found, creating...")
-			err := aws.CreateIamUser(awsSess, awsCfg.IamUserName)
-			if err != nil {
-				panic(err)
-			}
-		}
-		ssList, err := aws.ListStackSets(awsSess)
+	} else if arg.Action == "removeuser" {
+		fmt.Println("Removing IAM user")
+		err = aws.RemoveIamUser(awsSess, cfg.AWS.IamUserName)
 		if err != nil {
 			panic(err)
 		}
-		roleStackSetFound := false
-		for _, ss := range ssList {
-			if ss == "iamrotator" {
-				roleStackSetFound = true
-				break
-			}
+	} else if arg.Action == "removestackset" {
+		fmt.Println("Removing stack set")
+		err = aws.EmptyStackSet(awsSess, "iamrotator", cfg.AWS.Region)
+		if err != nil {
+			panic(err)
 		}
-		if roleStackSetFound {
-			fmt.Println("Role stack set found")
-		} else {
-			fmt.Println("Role stack set not found, creating...")
-			err := aws.CreateRoleStackSet(awsSess, awsCfg)
-			if err != nil {
-				panic(err)
-			}
+		err = aws.RemoveStackSet(awsSess, "iamrotator")
+		if err != nil {
+			panic(err)
 		}
+	} else {
+		fmt.Println("Usage: iamrotator <action> <configpath>")
+		os.Exit(1)
 	}
 }
