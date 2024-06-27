@@ -1,58 +1,71 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/rusik69/iamrotator/pkg/args"
 	"github.com/rusik69/iamrotator/pkg/aws"
 	"github.com/rusik69/iamrotator/pkg/config"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	logLevelString := os.Getenv("LOG_LEVEL")
+	if logLevelString == "" {
+		logLevelString = "info"
+	}
+	logLevel, err := logrus.ParseLevel(logLevelString)
+	if err != nil {
+		logrus.Warnf("Invalid log level '%s', defaulting to 'info'", logLevelString)
+		logLevel = logrus.InfoLevel
+	}
+	logrus.SetLevel(logLevel)
+
 	arg := args.Parse()
 	cfg, err := config.Load(arg.ConfigPath)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
-	fmt.Printf("Loaded configuration from %s\n", arg.ConfigPath)
-	fmt.Printf("Config: %v\n", cfg)
+	logrus.Info("Loaded configuration from %s\n", arg.ConfigPath)
+	logrus.Debug("Config: %v\n", cfg)
+
 	awsSess, err := aws.CreateSession(cfg.AWS)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
-	fmt.Printf("Checking AWS account %s\n", cfg.AWS.AccountID)
+	logrus.Info("Checking AWS account", cfg.AWS.AccountID)
 	if arg.Action == "createuser" {
 		newKeyID, NewKeySecret, err := aws.CheckOrCreateIamUser(awsSess, cfg.AWS.IamUserName)
 		if err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
-		fmt.Printf("Access Key ID: %s\n", newKeyID)
-		fmt.Printf("Secret Access Key: %s\n", NewKeySecret)
+		logrus.Info("Access Key ID:", newKeyID)
+		logrus.Info("Secret Access Key:", NewKeySecret)
 	} else if arg.Action == "createstackset" {
-		fmt.Println("Checking or creating stack set")
+		logrus.Info("Checking or creating stack set")
 		err = aws.CheckOrCreateStackSet(awsSess, cfg.AWS)
 		if err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
 	} else if arg.Action == "removeuser" {
-		fmt.Println("Removing IAM user")
+		logrus.Info("Removing IAM user")
 		err = aws.RemoveIamUser(awsSess, cfg.AWS.IamUserName)
 		if err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
 	} else if arg.Action == "removestackset" {
-		fmt.Println("Removing stack set")
+		logrus.Info("Emptying stack set")
 		err = aws.EmptyStackSet(awsSess, "iamrotator", cfg.AWS.Region)
 		if err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
+		logrus.Info("Removing stack set")
 		err = aws.RemoveStackSet(awsSess, "iamrotator")
 		if err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
 	} else {
-		fmt.Println("Usage: iamrotator <action> <configpath>")
+		logrus.Info("Usage: iamrotator <action> <configpath>")
 		os.Exit(1)
 	}
 }

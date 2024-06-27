@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/organizations"
 	"github.com/rusik69/iamrotator/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 // ListStackSets lists all stack sets
@@ -96,7 +96,7 @@ func CreateRoleStackSet(sess *session.Session, cfg types.AWS) error {
 	fmt.Println("Creating stack instances")
 	_, err = svc.CreateStackInstances(createStackInstancesInput)
 	if err != nil {
-		log.Fatalf("Failed to create stack instances: %v", err)
+		return err
 	}
 	for {
 		describeStackSetOperationInput := &cloudformation.DescribeStackSetOperationInput{
@@ -105,7 +105,7 @@ func CreateRoleStackSet(sess *session.Session, cfg types.AWS) error {
 		}
 		result, err := svc.DescribeStackSetOperation(describeStackSetOperationInput)
 		if err != nil {
-			log.Fatalf("Failed to describe stack set operation: %v", err)
+			logrus.Errorf("Failed to describe stack set operation: %v", err)
 		}
 		if *result.StackSetOperation.Status == "SUCCEEDED" {
 			break
@@ -132,7 +132,7 @@ func CheckOrCreateStackSet(sess *session.Session, cfg types.AWS) error {
 		fmt.Println("Stack set iamrotator found")
 		return nil
 	}
-	fmt.Println("Stack set iamrotator not found")
+	logrus.Info("Stack set iamrotator not found")
 	return CreateRoleStackSet(sess, cfg)
 }
 
@@ -143,22 +143,33 @@ func EmptyStackSet(sess *session.Session, stackSetName, region string) error {
 		StackSetName:        aws.String(stackSetName),
 		StackInstanceRegion: aws.String(region),
 	}
-	fmt.Println("Listing stack instances")
-	result, err := svc.ListStackInstances(input)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("%+v\n", result)
-	for _, instance := range result.Summaries {
-		fmt.Println("Deleting stack instance", *instance.Account, *instance.Region)
-		deleteInput := &cloudformation.DeleteStackInstancesInput{
-			StackSetName: aws.String(stackSetName),
-			Accounts:     []*string{instance.Account},
-			Regions:      []*string{instance.Region},
-		}
-		_, err := svc.DeleteStackInstances(deleteInput)
+	for {
+		failed := false
+		fmt.Println("Listing stack instances")
+		result, err := svc.ListStackInstances(input)
 		if err != nil {
 			return err
+		}
+		fmt.Printf("%+v\n", result)
+		for _, instance := range result.Summaries {
+			fmt.Println("Deleting stack instance", *instance.Account, *instance.Region)
+			deleteInput := &cloudformation.DeleteStackInstancesInput{
+				StackSetName: aws.String(stackSetName),
+				Accounts:     []*string{instance.Account},
+				Regions:      []*string{instance.Region},
+				RetainStacks: aws.Bool(false),
+			}
+			_, err := svc.DeleteStackInstances(deleteInput)
+			if err != nil {
+				logrus.Error(err)
+				failed = true
+			}
+		}
+		if !failed {
+			break
+		} else {
+			logrus.Info("Retrying in 10 seconds")
+			time.Sleep(10 * time.Second)
 		}
 	}
 	return nil
@@ -167,12 +178,21 @@ func EmptyStackSet(sess *session.Session, stackSetName, region string) error {
 // RemoveStackSet removes the stack set
 func RemoveStackSet(sess *session.Session, stackSetName string) error {
 	svc := cloudformation.New(sess)
-	input := &cloudformation.DeleteStackSetInput{
-		StackSetName: aws.String(stackSetName),
-	}
-	_, err := svc.DeleteStackSet(input)
-	if err != nil {
-		return err
+	for {
+		failed := false
+		input := &cloudformation.DeleteStackSetInput{
+			StackSetName: aws.String(stackSetName),
+		}
+		_, err := svc.DeleteStackSet(input)
+		if err != nil {
+			return err
+		}
+		if !failed {
+			break
+		} else {
+			logrus.Info("Retrying in 10 seconds")
+			time.Sleep(10 * time.Second)
+		}
 	}
 	return nil
 }

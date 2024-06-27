@@ -1,15 +1,15 @@
 package args
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Parse parses the command line arguments
 func Parse() Args {
 	if len(os.Args) < 3 {
-		fmt.Println("Usage: iamrotator <action> <configpath>")
-		os.Exit(1)
+		logrus.Panic("Usage: iamrotator <action> <configpath>")
 	}
 	action := os.Args[1]
 	configPath := os.Args[2]

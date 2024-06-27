@@ -1,11 +1,10 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/sirupsen/logrus"
 )
 
 // ListIamUsers lists all IAM users
@@ -25,7 +24,7 @@ func ListIamUsers(sess *session.Session) ([]string, error) {
 // CreateIamUser creates a new IAM user
 func CreateIamUser(sess *session.Session, userName string) error {
 	svc := iam.New(sess)
-	fmt.Println("Creating IAM user", userName)
+	logrus.Info("Creating IAM user", userName)
 	input := &iam.CreateUserInput{
 		UserName: &userName,
 	}
@@ -82,10 +81,10 @@ func CheckOrCreateIamUser(sess *session.Session, userName string) (string, strin
 		}
 	}
 	if userFound {
-		fmt.Println("IAM user", userName, "found")
+		logrus.Info("IAM user", userName, "found")
 		return "", "", err
 	}
-	fmt.Println("IAM user", userName, "not found")
+	logrus.Info("IAM user", userName, "not found")
 	err = CreateIamUser(sess, userName)
 	if err != nil {
 		return "", "", err
@@ -104,7 +103,7 @@ func RemoveIamUser(sess *session.Session, userName string) error {
 		return err
 	}
 	for _, policyName := range policyNames.PolicyNames {
-		fmt.Println("Detaching policy", *policyName)
+		logrus.Info("Detaching policy", *policyName)
 		detachPolicyInput := &iam.DeleteUserPolicyInput{
 			UserName:   aws.String(userName),
 			PolicyName: policyName,
@@ -126,7 +125,7 @@ func RemoveIamUser(sess *session.Session, userName string) error {
 			AccessKeyId: accessKey.AccessKeyId,
 			UserName:    aws.String(userName),
 		}
-		fmt.Println("Deleting access key", *accessKey.AccessKeyId)
+		logrus.Info("Deleting access key", *accessKey.AccessKeyId)
 		_, err := svc.DeleteAccessKey(deleteAccessKeyInput)
 		if err != nil {
 			return err
