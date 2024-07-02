@@ -26,8 +26,8 @@ func main() {
 	if err != nil {
 		logrus.Panic(err)
 	}
-	logrus.Info("Loaded configuration from %s\n", arg.ConfigPath)
-	logrus.Debug("Config: %v\n", cfg)
+	logrus.Info("Loaded configuration from", arg.ConfigPath)
+	logrus.Debugf("Config: %v\n", cfg)
 
 	awsSess, err := aws.CreateSession(cfg.AWS)
 	if err != nil {
@@ -53,6 +53,7 @@ func main() {
 		if err != nil {
 			logrus.Panic(err)
 		}
+		logrus.Info("IAM user removed")
 	} else if arg.Action == "removestackset" {
 		logrus.Info("Emptying stack set")
 		err = aws.EmptyStackSet(awsSess, "iamrotator", cfg.AWS.Region)
@@ -64,6 +65,7 @@ func main() {
 		if err != nil {
 			logrus.Panic(err)
 		}
+		logrus.Info("Stack set removed")
 	} else {
 		logrus.Info("Usage: iamrotator <action> <configpath>")
 		os.Exit(1)

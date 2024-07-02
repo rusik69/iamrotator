@@ -1,20 +1,23 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/rusik69/iamrotator/pkg/types"
 )
 
 // CreateSession creates a new AWS session
-func CreateSession(cfg types.AWS) (*session.Session, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(cfg.Region),
-		Credentials: credentials.NewStaticCredentials(cfg.AccessKeyID, cfg.SecretAccessKey, cfg.SessionToken),
-	})
+func CreateSession(cfg types.AWS) (aws.Config, error) {
+	// Load the default configuration
+	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion(cfg.Region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(cfg.AccessKeyID, cfg.SecretAccessKey, cfg.SessionToken)),
+	)
 	if err != nil {
-		return nil, err
+		return aws.Config{}, err
 	}
-	return sess, nil
+	return awsCfg, nil
 }

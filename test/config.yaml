@@ -10,6 +10,7 @@ aws:
 gerritRepos:
   - name: test
     url: https://gerrit.googlesource.com/git-repo
+    keyPath: /path/to/key
 githubOrgs:
   - name: test
     token: 1234567890abcdef1234567890abcdef12345678

@@ -1,16 +1,17 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/iam"
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/sirupsen/logrus"
 )
 
 // ListIamUsers lists all IAM users
-func ListIamUsers(sess *session.Session) ([]string, error) {
-	svc := iam.New(sess)
-	result, err := svc.ListUsers(&iam.ListUsersInput{})
+func ListIamUsers(sess aws.Config) ([]string, error) {
+	svc := iam.NewFromConfig(sess)
+	result, err := svc.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
 		return nil, err
 	}
@@ -22,13 +23,13 @@ func ListIamUsers(sess *session.Session) ([]string, error) {
 }
 
 // CreateIamUser creates a new IAM user
-func CreateIamUser(sess *session.Session, userName string) error {
-	svc := iam.New(sess)
+func CreateIamUser(sess aws.Config, userName string) error {
+	svc := iam.NewFromConfig(sess)
 	logrus.Info("Creating IAM user", userName)
 	input := &iam.CreateUserInput{
 		UserName: &userName,
 	}
-	_, err := svc.CreateUser(input)
+	_, err := svc.CreateUser(context.TODO(), input)
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func CreateIamUser(sess *session.Session, userName string) error {
 		PolicyName:     aws.String("AssumeRolePolicy"),
 		PolicyDocument: aws.String(policy),
 	}
-	_, err = svc.PutUserPolicy(putUserPolicyInput)
+	_, err = svc.PutUserPolicy(context.TODO(), putUserPolicyInput)
 	if err != nil {
 		return err
 	}
@@ -55,12 +56,12 @@ func CreateIamUser(sess *session.Session, userName string) error {
 }
 
 // CreateAccessKeys creates access keys for the IAM user
-func CreateAccessKeys(sess *session.Session, userName string) (string, string, error) {
-	svc := iam.New(sess)
+func CreateAccessKeys(sess aws.Config, userName string) (string, string, error) {
+	svc := iam.NewFromConfig(sess)
 	input := &iam.CreateAccessKeyInput{
 		UserName: aws.String(userName),
 	}
-	result, err := svc.CreateAccessKey(input)
+	result, err := svc.CreateAccessKey(context.TODO(), input)
 	if err != nil {
 		return "", "", err
 	}
@@ -68,7 +69,7 @@ func CreateAccessKeys(sess *session.Session, userName string) (string, string, e
 }
 
 // CheckOrCreateIamUser checks if the IAM user exists and creates it if it doesn't
-func CheckOrCreateIamUser(sess *session.Session, userName string) (string, string, error) {
+func CheckOrCreateIamUser(sess aws.Config, userName string) (string, string, error) {
 	users, err := ListIamUsers(sess)
 	if err != nil {
 		return "", "", err
@@ -93,22 +94,22 @@ func CheckOrCreateIamUser(sess *session.Session, userName string) (string, strin
 }
 
 // RemoveIamUser removes the IAM user
-func RemoveIamUser(sess *session.Session, userName string) error {
-	svc := iam.New(sess)
+func RemoveIamUser(sess aws.Config, userName string) error {
+	svc := iam.NewFromConfig(sess)
 	listPoliciesInput := &iam.ListUserPoliciesInput{
 		UserName: aws.String(userName),
 	}
-	policyNames, err := svc.ListUserPolicies(listPoliciesInput)
+	policyNames, err := svc.ListUserPolicies(context.TODO(), listPoliciesInput)
 	if err != nil {
 		return err
 	}
 	for _, policyName := range policyNames.PolicyNames {
-		logrus.Info("Detaching policy", *policyName)
+		logrus.Info("Detaching policy", policyName)
 		detachPolicyInput := &iam.DeleteUserPolicyInput{
 			UserName:   aws.String(userName),
-			PolicyName: policyName,
+			PolicyName: &policyName,
 		}
-		_, err := svc.DeleteUserPolicy(detachPolicyInput)
+		_, err := svc.DeleteUserPolicy(context.TODO(), detachPolicyInput)
 		if err != nil {
 			return err
 		}
@@ -116,7 +117,7 @@ func RemoveIamUser(sess *session.Session, userName string) error {
 	listAccessKeysInput := &iam.ListAccessKeysInput{
 		UserName: aws.String(userName),
 	}
-	accessKeys, err := svc.ListAccessKeys(listAccessKeysInput)
+	accessKeys, err := svc.ListAccessKeys(context.TODO(), listAccessKeysInput)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,7 @@ func RemoveIamUser(sess *session.Session, userName string) error {
 			UserName:    aws.String(userName),
 		}
 		logrus.Info("Deleting access key", *accessKey.AccessKeyId)
-		_, err := svc.DeleteAccessKey(deleteAccessKeyInput)
+		_, err := svc.DeleteAccessKey(context.TODO(), deleteAccessKeyInput)
 		if err != nil {
 			return err
 		}
@@ -134,7 +135,7 @@ func RemoveIamUser(sess *session.Session, userName string) error {
 	input := &iam.DeleteUserInput{
 		UserName: &userName,
 	}
-	_, err = svc.DeleteUser(input)
+	_, err = svc.DeleteUser(context.TODO(), input)
 	if err != nil {
 		return err
 	}
