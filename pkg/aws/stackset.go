@@ -17,6 +17,7 @@ func ListStackSets(sess aws.Config) ([]string, error) {
 	svc := cloudformation.NewFromConfig(sess)
 	input := &cloudformation.ListStackSetsInput{
 		Status: "ACTIVE",
+		CallAs: cftypes.CallAsDelegatedAdmin,
 	}
 	result, err := svc.ListStackSets(context.TODO(), input)
 	if err != nil {
@@ -59,7 +60,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
         }
     }`
 	input := &cloudformation.CreateStackSetInput{
-		StackSetName: aws.String("iamrotator"),
+		StackSetName: aws.String(cfg.StackSetName),
 		TemplateBody: aws.String(template),
 		AutoDeployment: &cftypes.AutoDeployment{
 			Enabled:                      aws.Bool(true),
@@ -69,15 +70,13 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
 		CallAs:          cftypes.CallAsDelegatedAdmin,
 	}
 	ctx := context.Background()
-	logrus.Info("Creating stack set iamrotator")
+	logrus.Info("Creating stack set", cfg.StackSetName)
 	_, err := svc.CreateStackSet(ctx, input)
 	if err != nil {
 		return err
 	}
 	orgs := organizations.NewFromConfig(sess)
-	// rootID holds the ID of the root of the organization
 	rootID := ""
-	// Get the root ID of the organization
 	rootInput := &organizations.ListRootsInput{}
 	rootResult, err := orgs.ListRoots(ctx, rootInput)
 	if err != nil {
@@ -89,7 +88,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
 	}
 	logrus.Info("Root ID:", rootID)
 	createStackInstancesInput := &cloudformation.CreateStackInstancesInput{
-		StackSetName: aws.String("iamrotator"),
+		StackSetName: aws.String(cfg.StackSetName),
 		DeploymentTargets: &cftypes.DeploymentTargets{
 			OrganizationalUnitIds: []string{rootID},
 		},
@@ -97,14 +96,14 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
 		CallAs:  cftypes.CallAsDelegatedAdmin,
 	}
 	logrus.Info("Creating stack set instances")
-	_, err = svc.CreateStackInstances(ctx, createStackInstancesInput)
+	out, err := svc.CreateStackInstances(ctx, createStackInstancesInput)
 	if err != nil {
 		return err
 	}
 	for {
 		describeStackSetOperationInput := &cloudformation.DescribeStackSetOperationInput{
-			StackSetName: aws.String("iamrotator"),
-			OperationId:  aws.String("iamrotator"),
+			StackSetName: aws.String(cfg.StackSetName),
+			OperationId:  out.OperationId,
 			CallAs:       cftypes.CallAsDelegatedAdmin,
 		}
 		result, err := svc.DescribeStackSetOperation(ctx, describeStackSetOperationInput)
@@ -145,38 +144,16 @@ func CheckOrCreateStackSet(sess aws.Config, cfg types.AWS) error {
 // EmptyStackSet empties the stack set
 func EmptyStackSet(sess aws.Config, stackSetName, region string) error {
 	svc := cloudformation.NewFromConfig(sess)
-	input := &cloudformation.ListStackInstancesInput{
-		StackSetName:        aws.String(stackSetName),
-		StackInstanceRegion: aws.String(region),
+	logrus.Info("Emptying stack set", stackSetName, region)
+	deleteInput := cloudformation.DeleteStackInstancesInput{
+		StackSetName: aws.String(stackSetName),
+		Regions:      []string{region},
+		RetainStacks: aws.Bool(false),
+		CallAs:       cftypes.CallAsDelegatedAdmin,
 	}
-	for {
-		failed := false
-		logrus.Info("Listing stack instances")
-		result, err := svc.ListStackInstances(context.TODO(), input)
-		if err != nil {
-			return err
-		}
-		for _, instance := range result.Summaries {
-			logrus.Info("Deleting stack instance", *instance.Account, *instance.Region)
-			deleteInput := cloudformation.DeleteStackInstancesInput{
-				StackSetName: aws.String(stackSetName),
-				Accounts:     []string{*instance.Account},
-				Regions:      []string{*instance.Region},
-				RetainStacks: aws.Bool(false),
-				CallAs:       cftypes.CallAsDelegatedAdmin,
-			}
-			_, err := svc.DeleteStackInstances(context.TODO(), &deleteInput)
-			if err != nil {
-				logrus.Error(err)
-				failed = true
-			}
-		}
-		if !failed {
-			break
-		} else {
-			logrus.Info("Retrying in 10 seconds")
-			time.Sleep(10 * time.Second)
-		}
+	_, err := svc.DeleteStackInstances(context.TODO(), &deleteInput)
+	if err != nil {
+		return err
 	}
 	return nil
 }

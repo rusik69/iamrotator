@@ -18,6 +18,8 @@ type AWS struct {
 	RoleName string `yaml:"roleName"`
 	// IamUserName represents the AWS IAM user name
 	IamUserName string `yaml:"iamUserName"`
+	// StackSetName represents the AWS stack set name
+	StackSetName string `yaml:"stackSetName"`
 }
 
 // GerritRepo represents the Gerrit repository configuration
