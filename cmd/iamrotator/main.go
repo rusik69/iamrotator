@@ -35,7 +35,7 @@ func main() {
 	}
 	logrus.Info("Checking AWS account", cfg.AWS.AccountID)
 	if arg.Action == "createuser" {
-		newKeyID, NewKeySecret, err := aws.CheckOrCreateIamUser(awsSess, cfg.AWS.IamUserName)
+		newKeyID, NewKeySecret, err := aws.CheckOrCreateIamUser(awsSess, cfg.AWS)
 		if err != nil {
 			logrus.Panic(err)
 		}
@@ -49,19 +49,19 @@ func main() {
 		}
 	} else if arg.Action == "removeuser" {
 		logrus.Info("Removing IAM user")
-		err = aws.RemoveIamUser(awsSess, cfg.AWS.IamUserName)
+		err = aws.RemoveIamUser(awsSess, cfg.AWS)
 		if err != nil {
 			logrus.Panic(err)
 		}
 		logrus.Info("IAM user removed")
 	} else if arg.Action == "removestackset" {
 		logrus.Info("Emptying stack set")
-		err = aws.EmptyStackSet(awsSess, "iamrotator", cfg.AWS.Region)
+		err = aws.EmptyStackSet(awsSess, cfg.AWS)
 		if err != nil {
 			logrus.Panic(err)
 		}
 		logrus.Info("Removing stack set")
-		err = aws.RemoveStackSet(awsSess, "iamrotator")
+		err = aws.RemoveStackSet(awsSess, cfg.AWS)
 		if err != nil {
 			logrus.Panic(err)
 		}

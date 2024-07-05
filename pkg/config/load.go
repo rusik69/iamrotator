@@ -19,5 +19,8 @@ func Load(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	if cfg.AWS.Region == "" {
+		cfg.AWS.Region = "us-east-1"
+	}
 	return cfg, nil
 }

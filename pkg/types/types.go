@@ -20,6 +20,8 @@ type AWS struct {
 	IamUserName string `yaml:"iamUserName"`
 	// StackSetName represents the AWS stack set name
 	StackSetName string `yaml:"stackSetName"`
+	// OUID represents the AWS organization unit ID
+	OUID string `yaml:"ouID"`
 }
 
 // GerritRepo represents the Gerrit repository configuration

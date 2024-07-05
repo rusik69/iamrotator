@@ -7,6 +7,8 @@ aws:
   sessionToken: AQoDYXdzEJr...EXAMPLE
   roleName: iamrotator
   iamUserName: iamrotator
+  stackSetName: iamrotator
+  ouID: r-abcd
 gerritRepos:
   - name: test
     url: https://gerrit.googlesource.com/git-repo
