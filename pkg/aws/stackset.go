@@ -70,7 +70,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
 		Capabilities:    []cftypes.Capability{"CAPABILITY_NAMED_IAM"},
 	}
 	ctx := context.Background()
-	logrus.Info("Creating stack set", cfg.StackSetName)
+	logrus.Info("Creating stack set ", cfg.StackSetName)
 	_, err := svc.CreateStackSet(ctx, input)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func CheckOrCreateStackSet(sess aws.Config, cfg types.AWS) error {
 // EmptyStackSet empties the stack set
 func EmptyStackSet(sess aws.Config, cfg types.AWS) error {
 	svc := cloudformation.NewFromConfig(sess)
-	logrus.Info("Emptying stack set", cfg.StackSetName, cfg.Region)
+	logrus.Info("Emptying stack set ", cfg.StackSetName, " ", cfg.Region)
 	deleteInput := cloudformation.DeleteStackInstancesInput{
 		StackSetName: aws.String(cfg.StackSetName),
 		Regions:      []string{cfg.Region},

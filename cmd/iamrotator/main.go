@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		logrus.Panic(err)
 	}
-	logrus.Info("Checking AWS account", cfg.AWS.AccountID)
+	logrus.Info("Checking AWS account ", cfg.AWS.AccountID)
 	if arg.Action == "createuser" {
 		newKeyID, NewKeySecret, err := aws.CheckOrCreateIamUser(awsSess, cfg.AWS)
 		if err != nil {
@@ -55,7 +55,6 @@ func main() {
 		}
 		logrus.Info("IAM user removed")
 	} else if arg.Action == "removestackset" {
-		logrus.Info("Emptying stack set")
 		err = aws.EmptyStackSet(awsSess, cfg.AWS)
 		if err != nil {
 			logrus.Panic(err)
