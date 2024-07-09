@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.53.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.34.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.29.1
+	github.com/aws/aws-sdk-go-v2/service/sts v1.30.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -24,7 +25,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.22.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.30.1 // indirect
 	github.com/aws/smithy-go v1.20.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect

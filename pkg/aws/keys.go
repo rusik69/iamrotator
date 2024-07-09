@@ -5,10 +5,9 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go-v2/aws/session"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/rusik69/iamrotator/pkg/types"
 )
 
@@ -16,14 +15,24 @@ import (
 func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey, error) {
 	var accessKeys []types.AWSAccessKey
 	org := organizations.NewFromConfig(sess)
-	err := org.ListAccounts(context.TODO(), &organizations.ListAccountsInput{},
-		func(page *organizations.ListAccountsOutput, lastPage bool) bool {
-			for _, account := range page.Accounts {
-				creds := stscreds.NewCredentials(sess, fmt.Sprintf("arn:aws:iam::%s:role/IAMAccessRole", *account.Id))
-				stsCfg := aws.Config{Credentials: creds}
-				
+	input := &organizations.ListAccountsForParentInput{
+		ParentId: &cfg.OUID,
+	}
+	result, err := org.ListAccountsForParent(context.TODO(), input)
 	if err != nil {
 		return nil, err
 	}
+	for _, account := range result.Accounts {
+		stsSvc := sts.NewFromConfig(sess)
+		input := &sts.AssumeRoleInput{
+			RoleArn:         aws.String(fmt.Sprintf("arn:aws:iam::%s:role/%s", *account.Id, cfg.RoleName)),
+			RoleSessionName: aws.String(cfg.RoleName),
+		}
+		stsRes, err := stsSvc.AssumeRole(context.TODO(), input)
+		if err != nil {
+			return nil, err
+		}
+		
+
 	return accessKeys, nil
 }
