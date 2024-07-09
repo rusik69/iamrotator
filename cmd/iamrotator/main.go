@@ -120,9 +120,12 @@ func main() {
 				logrus.Panic(err)
 			}
 			logrus.Info("Listing access keys")
-			err, keys = aws.ListAccessKeys(awsSess, cfg.AWS)
+			keys, err := aws.ListAccessKeys(awsSess, cfg.AWS)
 			if err != nil {
 				logrus.Panic(err)
+			}
+			for _, key := range keys {
+				logrus.Info("Account ID:", key.AccountID, "User Name:", key.UserName, "Access Key ID:", key.AccessKeyID)
 			}
 		},
 	}

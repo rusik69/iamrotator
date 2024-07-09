@@ -32,11 +32,16 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 		if err != nil {
 			return nil, err
 		}
-		iamSvc := iam.NewFromConfig(aws.Config{
-			Credentials: iam.CredentialsProvider{
-				Source: stsRes.Credentials,
-			},
+		sess, err := CreateSession(types.AWSConfig{
+			Region:          cfg.Region,
+			AccessKeyID:     *stsRes.Credentials.AccessKeyId,
+			SecretAccessKey: *stsRes.Credentials.SecretAccessKey,
+			SessionToken:    *stsRes.Credentials.SessionToken,
 		})
+		if err != nil {
+			return nil, err
+		}
+		iamSvc := iam.NewFromConfig(sess)
 		usersOutput, err := iamSvc.ListUsers(context.TODO(), &iam.ListUsersInput{})
 		if err != nil {
 			return nil, err
