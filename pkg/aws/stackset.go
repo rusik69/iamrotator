@@ -30,7 +30,7 @@ func ListStackSets(sess aws.Config) ([]string, error) {
 }
 
 // CreateRoleStackSet creates a new stack set for the role
-func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
+func CreateRoleStackSet(sess aws.Config, cfg types.AWSConfig) error {
 	svc := cloudformation.NewFromConfig(sess)
 	principalArn := "arn:aws:iam::" + cfg.AccountID + ":user/" + cfg.IamUserName
 	template := `{
@@ -109,7 +109,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWS) error {
 }
 
 // CheckOrCreateStackSet checks if the stack set exists and creates it if it doesn't
-func CheckOrCreateStackSet(sess aws.Config, cfg types.AWS) error {
+func CheckOrCreateStackSet(sess aws.Config, cfg types.AWSConfig) error {
 	stackSets, err := ListStackSets(sess)
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func CheckOrCreateStackSet(sess aws.Config, cfg types.AWS) error {
 }
 
 // EmptyStackSet empties the stack set
-func EmptyStackSet(sess aws.Config, cfg types.AWS) error {
+func EmptyStackSet(sess aws.Config, cfg types.AWSConfig) error {
 	svc := cloudformation.NewFromConfig(sess)
 	logrus.Info("Emptying stack set ", cfg.StackSetName, " ", cfg.Region)
 	deleteInput := cloudformation.DeleteStackInstancesInput{
@@ -150,7 +150,7 @@ func EmptyStackSet(sess aws.Config, cfg types.AWS) error {
 }
 
 // RemoveStackSet removes the stack set
-func RemoveStackSet(sess aws.Config, cfg types.AWS) error {
+func RemoveStackSet(sess aws.Config, cfg types.AWSConfig) error {
 	svc := cloudformation.NewFromConfig(sess)
 	for {
 		failed := false

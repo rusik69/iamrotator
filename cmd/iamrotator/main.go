@@ -107,7 +107,27 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(createUserCmd, createStackSetCmd, removeUserCmd, removeStackSetCmd)
+	var listKeysCmd = &cobra.Command{
+		Use:   "listkeys",
+		Short: "List access keys",
+		Run: func(cmd *cobra.Command, args []string) {
+			cfg, err := config.Load(configPath)
+			if err != nil {
+				logrus.Panic(err)
+			}
+			awsSess, err := aws.CreateSession(cfg.AWS)
+			if err != nil {
+				logrus.Panic(err)
+			}
+			logrus.Info("Listing access keys")
+			err, keys = aws.ListAccessKeys(awsSess, cfg.AWS)
+			if err != nil {
+				logrus.Panic(err)
+			}
+		},
+	}
+
+	rootCmd.AddCommand(createUserCmd, createStackSetCmd, removeUserCmd, removeStackSetCmd, listKeysCmd)
 	if err := rootCmd.Execute(); err != nil {
 		logrus.Panic(err)
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 // CreateSession creates a new AWS session
-func CreateSession(cfg types.AWS) (aws.Config, error) {
+func CreateSession(cfg types.AWSConfig) (aws.Config, error) {
 	// Load the default configuration
 	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(cfg.Region),

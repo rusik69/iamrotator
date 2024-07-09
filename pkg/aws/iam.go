@@ -24,7 +24,7 @@ func ListIamUsers(sess aws.Config) ([]string, error) {
 }
 
 // CreateIamUser creates a new IAM user
-func CreateIamUser(sess aws.Config, cfg types.AWS) error {
+func CreateIamUser(sess aws.Config, cfg types.AWSConfig) error {
 	svc := iam.NewFromConfig(sess)
 	logrus.Info("Creating IAM user", cfg.IamUserName)
 	input := &iam.CreateUserInput{
@@ -57,7 +57,7 @@ func CreateIamUser(sess aws.Config, cfg types.AWS) error {
 }
 
 // CreateAccessKeys creates access keys for the IAM user
-func CreateAccessKeys(sess aws.Config, cfg types.AWS) (string, string, error) {
+func CreateAccessKeys(sess aws.Config, cfg types.AWSConfig) (string, string, error) {
 	svc := iam.NewFromConfig(sess)
 	input := &iam.CreateAccessKeyInput{
 		UserName: aws.String(cfg.IamUserName),
@@ -70,7 +70,7 @@ func CreateAccessKeys(sess aws.Config, cfg types.AWS) (string, string, error) {
 }
 
 // CheckOrCreateIamUser checks if the IAM user exists and creates it if it doesn't
-func CheckOrCreateIamUser(sess aws.Config, cfg types.AWS) (string, string, error) {
+func CheckOrCreateIamUser(sess aws.Config, cfg types.AWSConfig) (string, string, error) {
 	users, err := ListIamUsers(sess)
 	if err != nil {
 		return "", "", err
@@ -95,7 +95,7 @@ func CheckOrCreateIamUser(sess aws.Config, cfg types.AWS) (string, string, error
 }
 
 // RemoveIamUser removes the IAM user
-func RemoveIamUser(sess aws.Config, cfg types.AWS) error {
+func RemoveIamUser(sess aws.Config, cfg types.AWSConfig) error {
 	svc := iam.NewFromConfig(sess)
 	listPoliciesInput := &iam.ListUserPoliciesInput{
 		UserName: aws.String(cfg.IamUserName),

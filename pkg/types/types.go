@@ -1,7 +1,7 @@
 package types
 
-// AWS represents the AWS configuration
-type AWS struct {
+// AWSConfig represents the AWSConfig configuration
+type AWSConfig struct {
 	// Name represents the AWS org name
 	Name string `yaml:"name"`
 	// AccountID represents the AWS account ID
@@ -22,6 +22,16 @@ type AWS struct {
 	StackSetName string `yaml:"stackSetName"`
 	// OUID represents the AWS organization unit ID
 	OUID string `yaml:"ouID"`
+}
+
+// AWSAccessKey represents the AWS access key
+type AWSAccessKey struct {
+	// AccessKeyID represents the AWS access key ID
+	AccessKeyID string `yaml:"accessKeyID"`
+	// SecretAccessKey represents the AWS secret access key
+	SecretAccessKey string `yaml:"secretAccessKey"`
+	// AccountID represents the AWS account ID
+	AccountID string `yaml:"accountID"`
 }
 
 // GerritRepo represents the Gerrit repository configuration
