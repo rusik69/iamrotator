@@ -39,7 +39,7 @@ func CreateIamUser(sess aws.Config, cfg types.AWSConfig) error {
         "Statement": [
             {
                 "Effect": "Allow",
-                "Action": "sts:AssumeRole",
+                "Action": ["sts:AssumeRole", "organizations:ListAccountsForParent"],
                 "Resource": "*"
             }
         ]

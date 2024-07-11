@@ -12,4 +12,6 @@ type Config struct {
 	GithubOrgs []types.GithubOrg `yaml:"githubOrgs"`
 	// K8sClusters represents the Kubernetes clusters configuration
 	K8sClusters []types.K8sCluster `yaml:"k8sClusters"`
+	// OnePasswords represents the 1Password configuration
+	OnePasswords []types.OnePassword `yaml:"onePasswords"`
 }

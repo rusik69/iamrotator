@@ -59,3 +59,13 @@ type K8sCluster struct {
 	// Kubeconfig represents the Kubernetes cluster kubeconfig
 	Kubeconfig string `yaml:"kubeconfig"`
 }
+
+// 1Password represents the 1Password configuration
+type OnePassword struct {
+	// Name represents the 1Password name
+	Name string `yaml:"name"`
+	// Token represents the 1Password token
+	Token string `yaml:"token"`
+	// Vault represents the 1Password vault
+	Vault string `yaml:"vault"`
+}

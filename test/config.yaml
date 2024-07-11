@@ -9,18 +9,27 @@ aws:
   iamUserName: iamrotator
   stackSetName: iamrotator
   ouID: r-abcd
+
+OnePasswords:
+  - name: test
+    token: 1234567890abcdef1234567890abcdef12345678
+    vault: test
+
 gerritRepos:
   - name: test
     url: https://gerrit.googlesource.com/git-repo
     keyPath: /path/to/key
+
 githubOrgs:
   - name: test
     token: 1234567890abcdef1234567890abcdef12345678
     user: test
+
 githubRepos:
   - name: test
     token: 1234567890abcdef1234567890abcdef12345678
     user: test
+
 k8sClusters:
   - name: test
     kubeconfig: |
@@ -28,7 +37,3 @@ k8sClusters:
       clusters:
       - cluster:
           server: https://localhost
-1passwordInstances:
-  - name: test
-    token: 1234567890abcdef1234567890abcdef12345678
-    user: test
