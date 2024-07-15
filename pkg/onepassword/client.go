@@ -8,10 +8,11 @@ import (
 )
 
 // CreateClient creates a new 1Password client
-func CreateClient(cfg types.OnePassword) {
+func CreateClient(cfg types.OnePassword) (*onepasswordsdk.Client, error) {
 	client, err := onepasswordsdk.NewClient(
 		context.TODO(),
 		onepasswordsdk.WithServiceAccountToken(cfg.Token),
 		onepasswordsdk.WithIntegrationInfo("iamrotator", "v0.0.1"),
 	)
+	return client, err
 }

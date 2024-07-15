@@ -48,8 +48,16 @@ type GithubOrg struct {
 	Name string `yaml:"name"`
 	// Token represents the Github organization token
 	Token string `yaml:"token"`
-	// User represents the Github organization user
-	User string `yaml:"user"`
+}
+
+// GithubRepo represents the Github repository configuration
+type GithubRepo struct {
+	// Name represents the Github repository name
+	Name string `yaml:"name"`
+	// Token represents the Github repository token
+	Token string `yaml:"token"`
+	// Owner represents the Github repository owner
+	Owner string `yaml:"owner"`
 }
 
 // K8sCluster represents the Kubernetes cluster configuration

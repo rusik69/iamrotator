@@ -10,6 +10,8 @@ type Config struct {
 	GerritRepos []types.GerritRepo `yaml:"gerritRepos"`
 	// GithubOrgs represents the Github organization configuration
 	GithubOrgs []types.GithubOrg `yaml:"githubOrgs"`
+	// GithubRepos represents the Github repository configuration
+	GithubRepos []types.GithubRepo `yaml:"githubRepos"`
 	// K8sClusters represents the Kubernetes clusters configuration
 	K8sClusters []types.K8sCluster `yaml:"k8sClusters"`
 	// OnePasswords represents the 1Password configuration
