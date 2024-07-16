@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 // AWSConfig represents the AWSConfig configuration
 type AWSConfig struct {
 	// Name represents the AWS org name
@@ -28,10 +30,16 @@ type AWSConfig struct {
 type AWSAccessKey struct {
 	// AccessKeyID represents the AWS access key ID
 	AccessKeyID string `yaml:"accessKeyID"`
+	// SecretAccessKey represents the AWS secret access key
+	SecretAccessKey string `yaml:"secretAccessKey"`
 	// UserName represents the AWS user name
 	UserName string `yaml:"userName"`
 	// AccountID represents the AWS account ID
 	AccountID string `yaml:"accountID"`
+	// CreateDate represents the AWS access key creation date
+	CreateDate time.Time `yaml:"createDate"`
+	// Status represents the AWS access key status
+	Status string `yaml:"status"`
 }
 
 // GerritRepo represents the Gerrit repository configuration

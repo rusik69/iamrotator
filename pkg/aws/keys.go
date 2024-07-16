@@ -2,12 +2,10 @@ package aws
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/rusik69/iamrotator/pkg/types"
 	"github.com/sirupsen/logrus"
 )
@@ -31,27 +29,12 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 			return nil, err
 		}
 		for _, account := range result.Accounts {
-			stsSvc := sts.NewFromConfig(sess)
-			input := &sts.AssumeRoleInput{
-				RoleArn:         aws.String(fmt.Sprintf("arn:aws:iam::%s:role/%s", *account.Id, cfg.RoleName)),
-				RoleSessionName: aws.String(cfg.RoleName),
-			}
-			stsRes, err := stsSvc.AssumeRole(context.TODO(), input)
+			newSess, err := CreateSessionWithRole(sess, cfg, *account.Id)
 			if err != nil {
 				logrus.Error(err)
 				continue
 			}
-			sess, err := CreateSession(types.AWSConfig{
-				Region:          cfg.Region,
-				AccessKeyID:     *stsRes.Credentials.AccessKeyId,
-				SecretAccessKey: *stsRes.Credentials.SecretAccessKey,
-				SessionToken:    *stsRes.Credentials.SessionToken,
-			})
-			if err != nil {
-				logrus.Error(err)
-				continue
-			}
-			iamSvc := iam.NewFromConfig(sess)
+			iamSvc := iam.NewFromConfig(newSess)
 			var userMarker *string
 			for {
 				usersOutput, err := iamSvc.ListUsers(context.TODO(), &iam.ListUsersInput{
@@ -75,6 +58,8 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 							UserName:    *user.UserName,
 							AccessKeyID: *key.AccessKeyId,
 							AccountID:   *account.Id,
+							CreateDate:  *key.CreateDate,
+							Status:      string(key.Status),
 						})
 					}
 				}
@@ -90,4 +75,44 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 		nextToken = result.NextToken
 	}
 	return accessKeys, nil
+}
+
+// RemoveAccessKey removes the access key for the user
+func RemoveAccessKey(sess aws.Config, cfg types.AWSConfig, key types.AWSAccessKey) error {
+	newSess, err := CreateSessionWithRole(sess, cfg, key.AccountID)
+	if err != nil {
+		return err
+	}
+	iamSvc := iam.NewFromConfig(newSess)
+	input2 := &iam.DeleteAccessKeyInput{
+		AccessKeyId: &key.AccessKeyID,
+		UserName:    &key.UserName,
+	}
+	_, err = iamSvc.DeleteAccessKey(context.TODO(), input2)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateAccessKey creates a new access key for the user
+func CreateAccessKey(sess aws.Config, cfg types.AWSConfig, user string) (types.AWSAccessKey, error) {
+	newSess, err := CreateSessionWithRole(sess, cfg, cfg.AccountID)
+	if err != nil {
+		return types.AWSAccessKey{}, err
+	}
+	iamSvc := iam.NewFromConfig(newSess)
+	input := &iam.CreateAccessKeyInput{
+		UserName: &user,
+	}
+	result, err := iamSvc.CreateAccessKey(context.TODO(), input)
+	if err != nil {
+		return types.AWSAccessKey{}, err
+	}
+	return types.AWSAccessKey{
+		UserName:        user,
+		AccessKeyID:     *result.AccessKey.AccessKeyId,
+		SecretAccessKey: *result.AccessKey.SecretAccessKey,
+		AccountID:       cfg.AccountID,
+	}, nil
 }
