@@ -38,7 +38,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWSConfig) error {
             "IAMAccessRole": {
                 "Type": "AWS::IAM::Role",
                 "Properties": {
-                    "RoleName": "IAMAccessRole",
+                    "RoleName": "` + cfg.RoleName + `",
                     "AssumeRolePolicyDocument": {
                         "Version": "2012-10-17",
                         "Statement": [
@@ -105,6 +105,7 @@ func CreateRoleStackSet(sess aws.Config, cfg types.AWSConfig) error {
 		}
 		time.Sleep(10 * time.Second)
 	}
+	logrus.Info("Stack set created")
 	return nil
 }
 

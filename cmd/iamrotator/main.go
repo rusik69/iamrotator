@@ -126,7 +126,7 @@ func main() {
 				logrus.Panic(err)
 			}
 			for _, key := range keys {
-				logrus.Info("Account ID:", key.AccountID, "User Name:", key.UserName, "Access Key ID:", key.AccessKeyID)
+				logrus.Info("Account ID: ", key.AccountID, " User Name: ", key.UserName, " Access Key ID: ", key.AccessKeyID)
 			}
 		},
 	}
