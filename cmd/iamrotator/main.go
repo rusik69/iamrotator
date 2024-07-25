@@ -14,7 +14,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "Path to the configuration file")
 	rootCmd.MarkPersistentFlagRequired("config")
 
-	rootCmd.AddCommand(createUserCmd, createStackSetCmd, removeUserCmd, removeStackSetCmd, listKeysCmd, CreateAccessKeyCmd, listOrgSecretsCmd, listRepoSecretsCmd)
+	rootCmd.AddCommand(createUserCmd, createStackSetCmd, removeUserCmd, removeStackSetCmd, listKeysCmd, createAccessKeyCmd, listOrgSecretsCmd, listRepoSecretsCmd)
 	if err := rootCmd.Execute(); err != nil {
 		logrus.Panic(err)
 	}

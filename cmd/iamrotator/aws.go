@@ -121,7 +121,7 @@ var listKeysCmd = &cobra.Command{
 	},
 }
 
-var CreateAccessKeyCmd = &cobra.Command{
+var createAccessKeyCmd = &cobra.Command{
 	Use:   "createaccesskey",
 	Short: "Create a new access key for the user",
 	Run: func(cmd *cobra.Command, args []string) {
