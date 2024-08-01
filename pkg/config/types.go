@@ -16,4 +16,6 @@ type Config struct {
 	K8sClusters []types.K8sCluster `yaml:"k8sClusters"`
 	// OnePasswords represents the 1Password configuration
 	OnePasswords []types.OnePassword `yaml:"onePasswords"`
+	// Web represents the web configuration
+	Web types.Web `yaml:"web"`
 }

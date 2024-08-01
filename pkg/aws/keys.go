@@ -58,6 +58,7 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 							UserName:    *user.UserName,
 							AccessKeyID: *key.AccessKeyId,
 							AccountID:   *account.Id,
+							AccountName: *account.Name,
 							CreateDate:  *key.CreateDate,
 							Status:      string(key.Status),
 						})

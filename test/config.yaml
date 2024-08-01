@@ -36,3 +36,5 @@ k8sClusters:
       clusters:
       - cluster:
           server: https://localhost
+web:
+  listenAddr: :8080

@@ -36,6 +36,8 @@ type AWSAccessKey struct {
 	UserName string `yaml:"userName"`
 	// AccountID represents the AWS account ID
 	AccountID string `yaml:"accountID"`
+	// AccountName represents the AWS account name
+	AccountName string `yaml:"accountName"`
 	// CreateDate represents the AWS access key creation date
 	CreateDate time.Time `yaml:"createDate"`
 	// Status represents the AWS access key status
@@ -84,4 +86,9 @@ type OnePassword struct {
 	Token string `yaml:"token"`
 	// Vault represents the 1Password vault
 	Vault string `yaml:"vault"`
+}
+
+// Web represents the web configuration
+type Web struct {
+	ListenAddr string `yaml:"listenAddr"`
 }
