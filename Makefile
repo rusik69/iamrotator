@@ -1,7 +1,7 @@
 .PHONY: all get build docker deploy
 
 build:
-	GOOS=linux GOARCH=arm64 go build -o bin/iamrotator cmd/iamrotator/*.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/iamrotator cmd/iamrotator/*.go
 	chmod +x bin/iamrotator
 
 get:
