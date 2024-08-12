@@ -38,3 +38,10 @@ k8sClusters:
           server: https://localhost
 web:
   listenAddr: :8080
+  ssoClientID: 1234567890abcdef1234567890abcdef12345678
+  ssoClientSecret: 1234567890abcdef1234567890abcdef12345678
+  ssoCallbackURL: http://localhost:8080/auth/callback
+  ssoStateString: 1234567890abcdef1234567890abcdef12345678
+  ssoAllowedIDs:
+    - 1234567890abcdef1234567890abcdef12345678
+  ssoCookieStoreKey: 123456

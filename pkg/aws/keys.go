@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -54,13 +55,25 @@ func ListAccessKeys(sess aws.Config, cfg types.AWSConfig) ([]types.AWSAccessKey,
 						continue
 					}
 					for _, key := range keysOutput.AccessKeyMetadata {
+						lastUsedOutput, err := iamSvc.GetAccessKeyLastUsed(context.TODO(), &iam.GetAccessKeyLastUsedInput{
+							AccessKeyId: key.AccessKeyId,
+						})
+						if err != nil {
+							logrus.Error(err)
+							continue
+						}
+						lastUsedDate := time.Time{}
+						if lastUsedOutput.AccessKeyLastUsed.LastUsedDate != nil {
+							lastUsedDate = *lastUsedOutput.AccessKeyLastUsed.LastUsedDate
+						}
 						accessKeys = append(accessKeys, types.AWSAccessKey{
-							UserName:    *user.UserName,
-							AccessKeyID: *key.AccessKeyId,
-							AccountID:   *account.Id,
-							AccountName: *account.Name,
-							CreateDate:  *key.CreateDate,
-							Status:      string(key.Status),
+							UserName:     *user.UserName,
+							AccessKeyID:  *key.AccessKeyId,
+							AccountID:    *account.Id,
+							AccountName:  *account.Name,
+							CreateDate:   *key.CreateDate,
+							LastUsedDate: lastUsedDate,
+							Status:       string(key.Status),
 						})
 					}
 				}

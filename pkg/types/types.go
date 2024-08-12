@@ -40,6 +40,8 @@ type AWSAccessKey struct {
 	AccountName string `yaml:"accountName"`
 	// CreateDate represents the AWS access key creation date
 	CreateDate time.Time `yaml:"createDate"`
+	// LastUsedDate represents the AWS access key last used date
+	LastUsedDate time.Time `yaml:"lastUsedDate"`
 	// Status represents the AWS access key status
 	Status string `yaml:"status"`
 }
@@ -90,5 +92,11 @@ type OnePassword struct {
 
 // Web represents the web configuration
 type Web struct {
-	ListenAddr string `yaml:"listenAddr"`
+	ListenAddr        string   `yaml:"listenAddr"`
+	SSOClientID       string   `yaml:"ssoClientID"`
+	SSOClientSecret   string   `yaml:"ssoClientSecret"`
+	SSOCallbackURL    string   `yaml:"ssoCallbackURL"`
+	SSOStateString    string   `yaml:"ssoStateString"`
+	SSOAllowedEmails  []string `yaml:"ssoAllowedEmails"`
+	SSOCookieStoreKey string   `yaml:"ssoCookieStoreKey"`
 }
